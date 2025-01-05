@@ -1,0 +1,15 @@
+--upgrade pip
+bs4 
+requests 
+numpy 
+pandas 
+selenium 
+flask 
+lxml 
+tabulate 
+webdriver_manager 
+tqdm 
+scikit-learn 
+tensorflow==2.10.0
+xgboost 
+pulp
