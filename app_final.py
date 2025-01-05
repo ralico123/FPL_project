@@ -30,23 +30,43 @@ def load_prediction_data():
     except Exception as e:
         print(f"Error loading prediction data: {e}")
         return {}
-
 def scrape_fpl_data(team_id):
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    }
     picks_url = f"https://fantasy.premierleague.com/api/entry/{team_id}/event/19/picks/"
     entry_url = f"https://fantasy.premierleague.com/api/entry/{team_id}/"
+    
+    # Add headers to mimic a browser request
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'application/json',
+        'Accept-Language': 'en-US,en;q=0.9',
+    }
 
     try:
-        picks_response = requests.get(picks_url, headers=headers, verify=True)
+        print(f"Attempting to fetch picks data from: {picks_url}")
+        picks_response = requests.get(picks_url, headers=headers, timeout=10)
+        print(f"Picks response status code: {picks_response.status_code}")
+        print(f"Picks response headers: {dict(picks_response.headers)}")
+        print(f"Picks response content: {picks_response.text[:200]}")  # First 200 chars
+        
         picks_response.raise_for_status()
         picks_data = picks_response.json()
+        
+        print(f"Attempting to fetch entry data from: {entry_url}")
+        entry_response = requests.get(entry_url, headers=headers, timeout=10)
+        print(f"Entry response status code: {entry_response.status_code}")
+        print(f"Entry response content: {entry_response.text[:200]}")  # First 200 chars
+        
+        entry_response.raise_for_status()
+        entry_data = entry_response.json()
+
         prediction_dict = load_prediction_data()
+        if not prediction_dict:
+            print("Warning: Prediction dictionary is empty")
+            
         picks_info = []
         for pick in picks_data.get("picks", []):
             element_id = pick.get("element")
-            prediction_data = prediction_dict.get(element_id, { 
+            prediction_data = prediction_dict.get(element_id, {
                 'player_name': "Unknown Player",
                 'PredP1': None,
                 'PredP3': None,
@@ -54,43 +74,44 @@ def scrape_fpl_data(team_id):
                 'price': None,
                 'Squad': None
             })
-
             picks_info.append({
                 "player_id": element_id,
                 "player_name": prediction_data['player_name'],
                 "multiplier": pick.get("multiplier"),
-                "Pos": pick.get("element_type"), 
+                "Pos": pick.get("element_type"),
                 "PredP1": prediction_data['PredP1'],
                 "PredP3": prediction_data['PredP3'],
                 "PredP5": prediction_data['PredP5'],
                 "price": prediction_data['price'],
                 "Squad": prediction_data['Squad']
-                
             })
 
-        entry_response = requests.get(entry_url, headers=headers, verify=True)
-        entry_response.raise_for_status()
-        entry_data = entry_response.json()
-        picks_response = requests.get(picks_url, headers=headers, verify=True)
-        picks_response.raise_for_status()
-        picks_data = picks_response.json()
         player_info = {
             "first_name": entry_data.get("player_first_name"),
             "last_name": entry_data.get("player_last_name"),
             "overall_points": entry_data.get("summary_overall_points"),
             "overall_rank": entry_data.get("summary_overall_rank"),
             "entry_name": entry_data.get("name"),
-            "bank": entry_data.get("last_deadline_bank"), 
+            "bank": entry_data.get("last_deadline_bank"),
         }
-        print("HERE IS THE PLAYER INFO")
-        print(player_info)
-
+        
+        print("Successfully processed team data")
         return picks_info, player_info
 
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching data: {e}")
-    return None, None
-
+        print(f"Request failed: {str(e)}")
+        if hasattr(e, 'response'):
+            print(f"Response status code: {e.response.status_code}")
+            print(f"Response headers: {dict(e.response.headers)}")
+            print(f"Response content: {e.response.text[:200]}")
+        return None, None
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        print(f"Error type: {type(e)}")
+        import traceback
+        traceback.print_exc()
+        return None, None
+    
 @app.route('/')
 def index():
     return render_template('index.html') 
@@ -98,26 +119,40 @@ def index():
 @app.route('/scrape', methods=['POST'])
 def scrape_route():
     team_id = request.form.get('team_id')
+    print(f"Received request for team_id: {team_id}")
 
     if not team_id:
+        print("No team_id provided")
         return "Error: team_id is required"
 
     try:
-        team_id = int(team_id) 
+        team_id = int(team_id)
     except ValueError:
+        print(f"Invalid team_id format: {team_id}")
         return "Error: team_id must be an integer"
 
-    picks, player_data = scrape_fpl_data(team_id)
-
-    if picks and player_data:
-        picks_file = os.path.join(app.config['UPLOAD_FOLDER'], f'Picks_Data_{team_id}.csv')
-        player_file = os.path.join(app.config['UPLOAD_FOLDER'], f'Player_Data_{team_id}.csv')
-        pd.DataFrame(picks).to_csv(picks_file, index=False)
-        pd.DataFrame([player_data]).to_csv(player_file, index=False)
-        return redirect(url_for('my_team', team_id=team_id))
-    else:
-        return "Error: Could not fetch the data for the provided team_id"
-    
+    try:
+        picks, player_data = scrape_fpl_data(team_id)
+        
+        if picks and player_data:
+            picks_file = os.path.join(app.config['UPLOAD_FOLDER'], f'Picks_Data_{team_id}.csv')
+            player_file = os.path.join(app.config['UPLOAD_FOLDER'], f'Player_Data_{team_id}.csv')
+            
+            print(f"Writing picks data to {picks_file}")
+            pd.DataFrame(picks).to_csv(picks_file, index=False)
+            
+            print(f"Writing player data to {player_file}")
+            pd.DataFrame([player_data]).to_csv(player_file, index=False)
+            
+            return redirect(url_for('my_team', team_id=team_id))
+        else:
+            print(f"Failed to fetch data for team_id: {team_id}")
+            return "Error: Could not fetch the data for the provided team_id"
+    except Exception as e:
+        print(f"Error in scrape_route: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return f"Error occurred: {str(e)}"
 @app.route('/my_team/<int:team_id>')
 def my_team(team_id):
     try:
