@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Optimized team ratings for the next 5 gameweeks">
+    <title>Optimized Team</title>
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, rgb(135, 206, 235), rgb(255, 255, 255), rgb(0, 230, 115));
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        h1, h2, h3 {
+            color: #222;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #444;
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: center;
+            background-color: rgb(0, 50, 90);
+            padding: 5px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 3px solid rgb(0, 204, 102);
+        }
+
+        .nav-link {
+            margin: 0 15px;
+            font-size: 1em;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: rgb(0, 204, 102);
+            color: black;
+        }
+
+        /* Rating Box Styles */
+        .rating-box-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .rating-box {
+            background-color: white;
+            border: 2px solid #000;
+            border-left: 7px solid rgb(0, 230, 115);
+            border-radius: 15px;
+            width: auto; /* Responsive */
+            max-width: 90%;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 10px auto;
+        }
+
+        .rating-box h3 {
+            font-size: 1.3em;
+            color: #222;
+            margin-bottom: 30px;
+        }
+
+        .diff-box {
+            background-color: rgb(0, 179, 89);
+            color: white;
+            padding: 24px;
+            border-radius: 10px;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        /* Team Section Styles */
+        .team-section {
+            margin-top: 30px;
+        }
+
+        .team-section h3 {
+            margin-bottom: 20px;
+        }
+
+        .player-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .player-card {
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 120px;
+            text-align: center;
+            border: 2px solid black;
+        }
+
+        .player-card h4 {
+            margin-bottom: 10px;
+        }
+
+        .pred-values {
+            font-size: 1.0em;
+        }
+
+        .pred-values span {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+
+        /* Dynamic Team Colors */
+        .team { background: rgb(221, 0, 0); color: #333; }
+        .team-arsenal { background: rgb(239, 1, 7); }
+        .team-aston-villa { background: rgb(103, 14, 54); }
+        .team-bournemouth { background: rgb(181, 14, 18); }
+        .team-brentford { background: rgb(210, 0, 0); }
+        .team-brighton { background: rgb(0, 87, 184); }
+        .team-chelsea { background: rgb(3, 70, 148); }
+        .team-crystal-palace { background: rgb(27, 69, 143); }
+        .team-everton { background: rgb(39, 68, 136); }
+        .team-fulham { background: rgb(255, 255, 255); color: #333; }
+        .team-ipswich-town { background: #de2c37; }
+        .team-leicester-city { background: rgb(253, 190, 17); }
+        .team-liverpool { background: rgb(200, 16, 46); }
+        .team-manchester-city { background: rgb(108, 171, 221); }
+        .team-manchester-utd { background: rgb(218, 41, 28); }
+        .team-newcastle-utd { background: rgb(255, 255, 255); color: #333; }
+        .team-nottingham-forest { background: rgb(221, 0, 0); color: #333; }
+        .team-southampton { background: rgb(215, 25, 32); }
+        .team-tottenham { background: rgb(255, 255, 255); color: #333; }
+        .team-west-ham { background: rgb(122, 38, 58); }
+        .team-wolves { background: rgb(253, 185, 19); }
+
+        /* Media Queries for Smaller Screens */
+        @media (max-width: 768px) {
+            .rating-box-container {
+                flex-direction: column;
+            }
+
+            .rating-box {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header" role="navigation">
+        <a href="{{ url_for('my_team', team_id=team_id, name=name, rank=rank) }}" class="nav-link">My Team</a>
+        <a href="{{ url_for('optimized_team', team_id=team_id, name=name, rank=rank) }}" class="nav-link active">AI Rating</a>
+        <a href="{{ url_for('transfers', team_id=team_id, name=name, rank=rank) }}" class="nav-link">Transfers</a>
+
+    <a href="{{ url_for('players', team_id=team_id) }}" class="nav-link">Players</a>
+
+    </div>
+
+    <div class="container">
+        <h1>Your Team Rating for the next 5 Gameweeks</h1>
+
+        <!-- Rating Boxes -->
+        <div class="rating-box-container">
+            <div class="rating-box">
+                <h3>Rating for the next Gameweek</h3>
+                <div class="diff-box">
+                    <strong>Rating:</strong> {{ result1 | round(2) }}%
+                </div>
+            </div>
+
+            <div class="rating-box">
+                <h3>Rating for the next 3 Gameweeks</h3>
+                <div class="diff-box">
+                    <strong>Rating:</strong> {{ result3 | round(2) }}%
+                </div>
+            </div>
+
+            <div class="rating-box">
+                <h3>Rating for the next 5 Gameweeks</h3>
+                <div class="diff-box">
+                    <strong>Rating:</strong> {{ result5 | round(2) }}%
+                </div>
+            </div>
+        </div>
+	<h1>Best Team for the next 5 Gameweeks(Wildcard)</h1>
+        <!-- Players -->
+        {% for position, label in [('GK', 'Goalkeepers'), ('DF', 'Defenders'), ('MF', 'Midfielders'), ('FW', 'Forwards')] %}
+        <div class="team-section">
+            <h3>{{ label }}</h3>
+            <div class="player-list">
+                {% for player in optimized_team %}
+                {% if player['Position'] == position %}
+                <div class="player-card {% if player['Squad'] | lower | replace(' ', '-') in ['arsenal', 'aston-villa', 'bournemouth', 'brentford', 'brighton', 'chelsea', 'crystal-palace', 'everton', 'fulham', 'ipswich-town', 'leicester-city', 'liverpool', 'manchester-city', 'manchester-utd', 'newcastle-utd', 'nottingham-forest', 'southampton', 'tottenham', 'west-ham', 'wolves'] %}team-{{ player['Squad'] | lower | replace(' ', '-') }}{% else %}team{% endif %}">
+                    <h4>{{ player['Player'] }}</h4>
+                    <div class="pred-values">
+                        <span>{{ player['PredP5'] | int }} points</span>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

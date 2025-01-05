@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPL Team Scraper</title>
+    <style>
+        /* Base Style */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: white;
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+        /* Welcome Section Background Gradient */
+        .background {
+            background: linear-gradient(135deg, rgb(43, 9, 92), rgb(0, 230, 115)); /* Purple to Green gradient */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Title Styling */
+        h1 {
+            color: white;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Subtitle */
+        h2 {
+            color: rgb(0, 255, 128); /* Green color to match theme */
+            font-size: 1.2em;
+            font-weight: normal;
+            margin-top: 0;
+        }
+
+        /* Form Styling */
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5); /* Slight transparency for form */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5);
+            width: 300px;
+            margin-top: 30px;
+        }
+
+        label {
+            color: white;
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 1em;
+            width: 250px;
+            border-radius: 5px;
+            border: none;
+            margin-bottom: 15px;
+            background-color: rgb(46, 19, 77); /* Dark purple */
+            color: white;
+        }
+
+        input:focus {
+            outline: none;
+            background-color: rgb(0, 255, 128); /* Green focus */
+        }
+
+        button {
+            background-color: rgb(0, 255, 128); /* Green */
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: rgb(43, 9, 92); /* Darker purple */
+        }
+
+        /* Logo Styling */
+        .logo {
+            width: 150px;
+            margin-bottom: 20px;
+        }
+
+        /* Footer Section */
+        .footer {
+            margin-top: 30px;
+            font-size: 0.8em;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="background">
+
+        <!-- Placeholder for Premier League logo -->
+        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Premier_League_Logo.svg/1200px-Premier_League_Logo.svg.png" alt="Premier League Logo" class="logo">
+        <h1>Welcome to FPL Bocconi Point Predictor</h1>
+        <h1>Be ready to win your Mini-League!</h1>
+        <h2>Enter your FPL Team ID below to get started( look in the FPL url!)</h2>
+
+        <form action="/scrape" method="POST">
+            <label for="team_id">Team ID:</label>
+            <input type="text" id="team_id" name="team_id" required>
+            <button type="submit">Scrape Team</button>
+        </form>
+        
+        <div class="footer">
+            <p>Powered by Redi and Stefan</p>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scraped FPL Data</title>
+    <style>
+        /* Base Style */
+        html, body {
+    height: 100%; /* Ensure the body and html elements take the full height of the screen */
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 5;
+	background-repeat: no-repeat; /* Prevent the gradient from repeating */
+    background-attachment: fixed; /* Make the gradient fixed relative to the viewport */
+    background-size: cover; /* Ensure the gradient covers the entire viewport */    
+	background: linear-gradient(135deg, rgb(135, 206, 235), rgb(255, 255, 255), rgb(0, 230, 115));
+    color: white;
+    height: 100vh;
+    overflow-x: hidden;
+    transition: background-color 0.3s ease;
+    min-height: 100%; /* Ensure the body takes at least the full height of the screen */
+}
+
+        .container {
+            transform: scale(0.9);
+            transform-origin: top center;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            padding: 10px;
+        }
+
+        h1 {
+            color: rgb(0, 204, 102);
+            padding: 4px;
+            font-size: 1.8em;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        h2, h3 {
+            color: black;
+            margin-top: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        p {
+            font-size: 1.2em;
+            color: #ddd;
+            padding: 6px 0;
+            margin: 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Header Style */
+        .header {
+            display: flex;
+            justify-content: center;
+            background-color: rgb(0, 50, 90);
+            padding: 5px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 3px solid rgb(0, 204, 102);
+        }
+
+        .nav-link {
+            margin: 0 20px;
+            font-size: 1em;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: rgb(0, 204, 102);
+            color: black;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-link.active {
+            background-color: rgb(0, 204, 102);
+            color: black;
+            font-weight: bold;
+        }
+
+        /* Player Data Boxes */
+.player-info-box {
+    background: linear-gradient(135deg, rgb(0, 230, 115), rgb(0, 75, 102));
+    border-radius: 20px; /* Slightly smaller radius for more subtle rounded corners */
+    padding: 3px 6px; /* Reduced padding for a smaller, cleaner look */
+    margin: 5px auto; /* Centered horizontally with a margin from other content */
+    width: 50%; /* Smaller width */
+    max-width: 400px; /* Ensures it doesn’t stretch too wide on large screens */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for subtle elevation */
+    color: white;
+    display: grid; /* Use grid layout */
+    grid-template-columns: 1fr 1fr; /* Create two equal columns */
+    grid-gap: 3px; /* Space between columns */
+    text-align: left; /* Align the text to the left */
+}
+
+/* For the player info text */
+.player-info-box p {
+    font-size: 1.1em; /* Slightly smaller text for a more compact look */
+    margin-bottom: 3px; /* Clean margin between lines */
+    display: flex;
+    justify-content: space-between; /* Spread the label and value across two columns */
+}
+
+/* Style for labels */
+.player-info-box strong {
+    color: rgb(31, 64, 96); /* Slightly darker color for labels */
+}
+
+        /* Player Section */
+        .section {
+            margin-top: px;
+        }
+
+        .player-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .player-box {
+            background-color: rgb(31, 64, 96);
+            color: white;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            width: 120px;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+            overflow: hidden;
+            transition: transform 0.3s ease-in-out, background-color 0.3s ease;
+        }
+
+        .player-box:hover {
+            transform: scale(1.08);
+            background-color: rgb(77, 184, 255);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .player-name {
+            color: rgb(255, 255, 255);
+            font-size: 1em;
+            margin-bottom: 6px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .price {
+            font-size: 1em;
+            color: rgb(0, 204, 102);
+            font-weight: bold;
+        }
+
+        .prediction-box {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            gap: 3px;
+        }
+
+        .prediction {
+            background-color: rgb(0, 204, 102);
+            padding: 4px 6px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            width: 30%;
+            text-align: center;
+        }
+
+        .prediction strong {
+            font-size: 0.7em;
+        }
+
+        /* Background Image */
+        .background {
+            background-image: url('https://cuppy-assets-v1.fra1.cdn.digitaloceanspaces.com/v1/field_mobile_5.png');
+            background-position: top;
+            background-size: 30%;
+            background-repeat: no-repeat;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+            position: relative;
+            padding: 0 10px;
+            filter: brightness(0.8);
+        }
+
+        .bench-icon {
+            width: 100px; /* Slightly bigger for better visibility */
+            margin: 0px auto;
+        }
+
+        .bench-section {
+            background-color: rgba(0, 0, 0, 0.7); /* Darker transparent background */
+            border: 3px solid rgb(0, 204, 102);
+            border-radius: 10px;
+            padding: 0px;
+            margin-top: 85px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+    <a href="{{ url_for('my_team', team_id=team_id, name=name, rank=rank) }}" class="nav-link active">My Team</a>
+    <a href="{{ url_for('optimized_team', team_id=team_id, name=name, rank=rank) }}" class="nav-link">AI Rating</a>
+    <a href="{{ url_for('transfers', team_id=team_id, name=name, rank=rank) }}" class="nav-link">Transfers</a>
+    <a href="{{ url_for('players', team_id=team_id) }}" class="nav-link">Players</a>
+</div>
+
+    <div class="container">
+
+        <div class="player-info-box">
+            <p><strong>First Name:</strong> {{ player_data.first_name }}</p>
+            <p><strong>Last Name:</strong> {{ player_data.last_name }}</p>
+            <p><strong>Overall Points:</strong> {{ player_data.overall_points }}</p>
+            <p><strong>Overall Rank:</strong> {{ player_data.overall_rank }}</p>
+            <p><strong>Entry Name:</strong> {{ player_data.entry_name }}</p>
+	    <p><strong>Team Id:</strong> {{ team_id }}</p>
+
+        </div>
+
+        <div class="background">
+            <div class="section">
+                
+                <div class="player-row">
+                    {% for pick in picks %}
+                        {% if pick.Pos == 1 and pick.multiplier != 0 %}
+                            <div class="player-box">
+                                <p class="player-name">{{ pick.player_name }}</p>
+                                <p class="price">{{ pick.price/10 }}</p>
+                                <div class="prediction-box">
+                                    <div class="prediction"><strong>1GW:</strong> {{ pick.PredP1 | int }}</div>
+                                    <div class="prediction"><strong>3GWs:</strong> {{ pick.PredP3 | int }}</div>
+                                    <div class="prediction"><strong>5GWs:</strong> {{ pick.PredP5 | int }}</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="section">
+            
+                <div class="player-row">
+                    {% for pick in picks %}
+                        {% if pick.Pos == 2 and pick.multiplier != 0 %}
+                            <div class="player-box">
+                                <p class="player-name">{{ pick.player_name }}</p>
+                                <p class="price">{{ pick.price/10 }}</p>
+                                <div class="prediction-box">
+                                    <div class="prediction"><strong>1GW:</strong> {{ pick.PredP1 | int }}</div>
+                                    <div class="prediction"><strong>3GWs:</strong> {{ pick.PredP3 | int }}</div>
+                                    <div class="prediction"><strong>5GWs:</strong> {{ pick.PredP5 | int }}</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="section">
+                
+                <div class="player-row">
+                    {% for pick in picks %}
+                        {% if pick.Pos == 3 and pick.multiplier != 0 %}
+                            <div class="player-box">
+                                <p class="player-name">{{ pick.player_name }}</p>
+                                <p class="price">{{ pick.price/10 }}</p>
+                                <div class="prediction-box">
+                                    <div class="prediction"><strong>1GW:</strong> {{ pick.PredP1 | int }}</div>
+                                    <div class="prediction"><strong>3GWs:</strong> {{ pick.PredP3 | int }}</div>
+                                    <div class="prediction"><strong>5GWs:</strong> {{ pick.PredP5 | int }}</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="section">
+                
+                <div class="player-row">
+                    {% for pick in picks %}
+                        {% if pick.Pos == 4 and pick.multiplier != 0 %}
+                            <div class="player-box">
+                                <p class="player-name">{{ pick.player_name }}</p>
+                                <p class="price">{{ pick.price/10 }}</p>
+                                <div class="prediction-box">
+                                    <div class="prediction"><strong>1GW:</strong> {{ pick.PredP1 | int }}</div>
+                                    <div class="prediction"><strong>3GWs:</strong> {{ pick.PredP3 | int }}</div>
+                                    <div class="prediction"><strong>5GWs:</strong> {{ pick.PredP5 | int }}</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bench-section">
+                <img src="https://cdn-icons-png.flaticon.com/512/27/27186.png" alt="Bench Icon" class="bench-icon">
+                <div class="player-row">
+                    {% for pick in picks %}
+                        {% if pick.multiplier == 0 %}
+                            <div class="player-box bench">
+                                <p class="player-name">{{ pick.player_name }}</p>
+                                <p class="price">{{ pick.price/10 }}</p>
+                                <div class="prediction-box">
+                                    <div class="prediction"><strong>1GW:</strong> {{ pick.PredP1 | int }}</div>
+                                    <div class="prediction"><strong>3GWs:</strong> {{ pick.PredP3 | int }}</div>
+                                    <div class="prediction"><strong>5GWs:</strong> {{ pick.PredP5 | int }}</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
